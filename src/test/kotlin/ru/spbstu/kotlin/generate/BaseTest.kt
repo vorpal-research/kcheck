@@ -9,6 +9,8 @@ fun <T> T.trace(): T = apply { println(this) }
 class BaseTest {
     @Test
     fun testSimple() {
-        assertTrue(Gens.forAll(20000) { d: Double? -> d.trace() == d })
+        assertTrue(Gens.forAll { d: Double? -> d.trace() == d })
+
+        assertTrue(Gens.forAll { d: List<Double?> -> d.trace() == d })
     }
 }

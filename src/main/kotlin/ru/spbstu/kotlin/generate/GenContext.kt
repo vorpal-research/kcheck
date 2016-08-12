@@ -238,7 +238,11 @@ abstract class GenContext(val random: Random = Random()) {
     inline fun <reified T, R> feed(noinline function: (T) -> R): R {
         val type = buildTH<T>(function.reflect()?.parameters?.first()?.type!!)
 
-        return function(default[type]?.nextValue() as T)
+        val tryDefault = default[type]?.nextValue() as T?
+
+        if(tryDefault != null) return function(tryDefault)
+
+        TODO("generic cases")
     }
 
     inline fun <reified T> forAll(tries: Int = 100, noinline function: (T) -> Boolean) =
