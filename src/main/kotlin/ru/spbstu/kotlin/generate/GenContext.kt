@@ -215,6 +215,26 @@ abstract class GenContext(val random: Random = Random()) {
                     }
             )
 
+    fun <K, V> defaultForMap(kGen: Gen<K>, vGen: Gen<V>): Gen<Map<K, V>> = run{
+        val pairGen = defaultForPair(kGen, vGen)
+        priorities(
+                1 to gen { mapOf<K, V>() },
+                1 to gen { mapOf(pairGen.nextValue()) },
+                3 to gen {
+                    val len = random.nextInt(20)
+                    IntRange(0, len).map { pairGen.nextValue() }.toMap()
+                },
+                3 to gen {
+                    val len = random.nextInt(255)
+                    IntRange(0, len).map { pairGen.nextValue() }.toMap()
+                },
+                1 to gen {
+                    val len = random.nextInt(3000)
+                    IntRange(0, len).map { pairGen.nextValue() }.toMap()
+                }
+        )
+    }
+
     fun <A, B> defaultForPair(aGen: Gen<A>, bGen: Gen<B>): Gen<Pair<A, B>> =
             gen { Pair(aGen.nextValue(), bGen.nextValue()) }
     fun <A, B, C> defaultForTriple(aGen: Gen<A>, bGen: Gen<B>, cGen: Gen<C>): Gen<Triple<A, B, C>> =
@@ -260,10 +280,60 @@ abstract class GenContext(val random: Random = Random()) {
         }
     }
 
-    @JvmName("installFunction")
-    inline fun <reified T> install(noinline function: () -> T) {
+    inline fun <reified T> installFunction(noinline function: () -> T) {
         val type = buildTH<T>(function)
         val gen = gen(function)
+        default[type] = gen
+        if (!type.isNullable) {
+            default[type.copy(isNullable = true)] = defaultForNullable(gen)
+        }
+    }
+
+    inline fun <reified T1, reified T> installFunction(noinline function: (T1) -> T) {
+        val ref = function.reflect()
+        val type = buildTH<T>(ref?.returnType!!)
+        val type1 = buildTH<T1>(ref?.parameters?.get(0)?.type!!)
+
+        val gen = gen{
+            val argGen = getGen(type1) as? Gen<T1>
+            argGen?.nextValue()?.let(function)!!
+        }
+        default[type] = gen
+        if (!type.isNullable) {
+            default[type.copy(isNullable = true)] = defaultForNullable(gen)
+        }
+    }
+
+    inline fun <reified T1, reified T2, reified T> installFunction(noinline function: (T1, T2) -> T) {
+        val ref = function.reflect()
+        val type = buildTH<T>(ref?.returnType!!)
+        val type1 = buildTH<T1>(ref?.parameters?.get(0)?.type!!)
+        val type2 = buildTH<T2>(ref?.parameters?.get(1)?.type!!)
+
+        val gen = gen{
+            val arg1Gen = getGen(type1) as Gen<T1>
+            val arg2Gen = getGen(type2) as Gen<T2>
+            function(arg1Gen.nextValue(), arg2Gen.nextValue())
+        }
+        default[type] = gen
+        if (!type.isNullable) {
+            default[type.copy(isNullable = true)] = defaultForNullable(gen)
+        }
+    }
+
+    inline fun <reified T1, reified T2, reified T3, reified T> installFunction(noinline function: (T1, T2, T3) -> T) {
+        val ref = function.reflect()
+        val type = buildTH<T>(ref?.returnType!!)
+        val type1 = buildTH<T1>(ref?.parameters?.get(0)?.type!!)
+        val type2 = buildTH<T2>(ref?.parameters?.get(1)?.type!!)
+        val type3 = buildTH<T3>(ref?.parameters?.get(2)?.type!!)
+
+        val gen = gen{
+            val arg1Gen = getGen(type1) as Gen<T1>
+            val arg2Gen = getGen(type2) as Gen<T2>
+            val arg3Gen = getGen(type3) as Gen<T3>
+            function(arg1Gen.nextValue(), arg2Gen.nextValue(), arg3Gen.nextValue())
+        }
         default[type] = gen
         if (!type.isNullable) {
             default[type.copy(isNullable = true)] = defaultForNullable(gen)
@@ -306,6 +376,31 @@ abstract class GenContext(val random: Random = Random()) {
     inline fun <reified T> forAll(tries: Int = 100, noinline function: (T) -> Boolean) =
             (0..tries).fold(true) { acc, v -> acc and feed(function) }
 
+    inline fun <reified T1, reified T2, R> feed(noinline function: (T1, T2) -> R): R {
+        val arg1 = buildTH<T1>(function.reflect()?.parameters?.get(0)?.type!!)
+        val arg2 = buildTH<T2>(function.reflect()?.parameters?.get(1)?.type!!)
+        return function(
+                getGen(arg1)?.nextValue() as T1,
+                getGen(arg2)?.nextValue() as T2
+        )
+    }
+
+    inline fun <reified T1, reified T2> forAll(tries: Int = 100, noinline function: (T1, T2) -> Boolean) =
+            (0..tries).fold(true) { acc, v -> acc and feed(function) }
+
+    inline fun <reified T1, reified T2, reified T3, R> feed(noinline function: (T1, T2, T3) -> R): R {
+        val arg1 = buildTH<T1>(function.reflect()?.parameters?.get(0)?.type!!)
+        val arg2 = buildTH<T2>(function.reflect()?.parameters?.get(1)?.type!!)
+        val arg3 = buildTH<T3>(function.reflect()?.parameters?.get(2)?.type!!)
+        return function(
+                getGen(arg1)?.nextValue() as T1,
+                getGen(arg2)?.nextValue() as T2,
+                getGen(arg3)?.nextValue() as T3
+        )
+    }
+
+    inline fun <reified T1, reified T2, reified T3> forAll(tries: Int = 100, noinline function: (T1, T2, T3) -> Boolean) =
+            (0..tries).fold(true) { acc, v -> acc and feed(function) }
 
 }
 
@@ -323,12 +418,13 @@ object Gens : GenContext() {
         install { arg -> defaultForArray(arg) }
         install { arg -> defaultForList(arg) }
         install { arg -> defaultForSet(arg) }
+        install { arg1, arg2 -> defaultForMap(arg1, arg2) }
 
         install { arg1, arg2 -> defaultForPair(arg1, arg2) }
         install { arg1, arg2, arg3 -> defaultForTriple(arg1, arg2, arg3) }
 
         install {-> defaultForString() as Gen<CharSequence> }
-        install { arg -> defaultForList(arg) as Gen<Collection<*>>}
-        install { arg -> defaultForList(arg) as Gen<Iterable<*>>}
+        install { arg -> defaultForList(arg) as Gen<Collection<*>> }
+        install { arg -> defaultForList(arg) as Gen<Iterable<*>> }
     }
 }
