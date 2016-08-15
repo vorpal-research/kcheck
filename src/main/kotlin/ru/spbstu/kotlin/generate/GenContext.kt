@@ -155,23 +155,23 @@ abstract class GenContext(val random: Random = Random()) {
             20 to pure
     )
 
-    fun <T> defaultForArray(element: TypeHolder, elGen: Gen<T>): Gen<Array<T>> =
+    fun <T> defaultForArray(elGen: Gen<T>): Gen<Array<T>> =
             priorities(
-                    1 to gen { java.lang.reflect.Array.newInstance(element.clazz, 0) },
+                    1 to gen { java.lang.reflect.Array.newInstance(Any::class.java, 0) },
                     1 to gen {
-                        val arr = java.lang.reflect.Array.newInstance(element.clazz, 1)
+                        val arr = java.lang.reflect.Array.newInstance(Any::class.java, 1)
                         java.lang.reflect.Array.set(arr, 0, elGen.nextValue())
                         arr
                     },
                     3 to gen {
                         val len = random.nextInt(20)
-                        val arr = java.lang.reflect.Array.newInstance(element.clazz, len)
+                        val arr = java.lang.reflect.Array.newInstance(Any::class.java, len)
                         IntRange(0, len - 1).forEach { java.lang.reflect.Array.set(arr, it, elGen.nextValue()) }
                         arr
                     },
                     3 to gen {
                         val len = random.nextInt(255)
-                        val arr = java.lang.reflect.Array.newInstance(element.clazz, len)
+                        val arr = java.lang.reflect.Array.newInstance(Any::class.java, len)
 
                         IntRange(0, len - 1).forEach { java.lang.reflect.Array.set(arr, it, elGen.nextValue()) }
                         arr
@@ -215,6 +215,11 @@ abstract class GenContext(val random: Random = Random()) {
                     }
             )
 
+    fun <A, B> defaultForPair(aGen: Gen<A>, bGen: Gen<B>): Gen<Pair<A, B>> =
+            gen { Pair(aGen.nextValue(), bGen.nextValue()) }
+    fun <A, B, C> defaultForTriple(aGen: Gen<A>, bGen: Gen<B>, cGen: Gen<C>): Gen<Triple<A, B, C>> =
+            gen { Triple(aGen.nextValue(), bGen.nextValue(), cGen.nextValue()) }
+
     @JvmName("installGenerator")
     inline fun <reified T, reified G : Gen<T>> install(noinline function: () -> G) {
         val type = buildTH<G>(function).arguments.first()
@@ -222,6 +227,36 @@ abstract class GenContext(val random: Random = Random()) {
         default[type] = gen
         if (!type.isNullable) {
             default[type.copy(isNullable = true)] = defaultForNullable(gen)
+        }
+    }
+
+    @JvmName("installGenericGenerator1")
+    inline fun <reified T, reified G : Gen<T>> install(noinline function: (Gen<*>) -> G) {
+        val type = buildTH<G>(function.reflect()?.returnType!!).arguments.first()
+        generic1[type.copy(arguments = emptyList())] = function
+        if (!type.isNullable) {
+            generic1[type.copy(isNullable = true, arguments = emptyList())] =
+                    { arg -> defaultForNullable(function(arg)) }
+        }
+    }
+
+    @JvmName("installGenericGenerator2")
+    inline fun <reified T, reified G : Gen<T>> install(noinline function: (Gen<*>, Gen<*>) -> G) {
+        val type = buildTH<G>(function.reflect()?.returnType!!).arguments.first()
+        generic2[type.copy(arguments = emptyList())] = function
+        if (!type.isNullable) {
+            generic2[type.copy(isNullable = true, arguments = emptyList())] =
+                    { arg1, arg2 -> defaultForNullable(function(arg1, arg2)) }
+        }
+    }
+
+    @JvmName("installGenericGenerator3")
+    inline fun <reified T, reified G : Gen<T>> install(noinline function: (Gen<*>, Gen<*>, Gen<*>) -> G) {
+        val type = buildTH<G>(function.reflect()?.returnType!!).arguments.first()
+        generic3[type.copy(arguments = emptyList())] = function
+        if (!type.isNullable) {
+            generic3[type.copy(isNullable = true, arguments = emptyList())] =
+                    { arg1, arg2, arg3 -> defaultForNullable(function(arg1, arg2, arg3)) }
         }
     }
 
@@ -235,14 +270,37 @@ abstract class GenContext(val random: Random = Random()) {
         }
     }
 
+    fun getGen(type: TypeHolder): Gen<*>? {
+        when(type.arguments.size) {
+            0 -> return default[type]
+            1 -> {
+                val argGen = getGen(type.arguments.first())
+                argGen ?: return null
+                return generic1[type.copy(arguments = emptyList())]?.invoke(argGen)
+            }
+            2 -> {
+                val argGen0 = getGen(type.arguments[0])
+                argGen0 ?: return null
+                val argGen1 = getGen(type.arguments[1])
+                argGen1 ?: return null
+                return generic2[type.copy(arguments = emptyList())]?.invoke(argGen0, argGen1)
+            }
+            3 -> {
+                val argGen0 = getGen(type.arguments[0])
+                argGen0 ?: return null
+                val argGen1 = getGen(type.arguments[1])
+                argGen1 ?: return null
+                val argGen2 = getGen(type.arguments[2])
+                argGen2 ?: return null
+                return generic3[type.copy(arguments = emptyList())]?.invoke(argGen0, argGen1, argGen2)
+            }
+            else -> return TODO()
+        }
+    }
+
     inline fun <reified T, R> feed(noinline function: (T) -> R): R {
         val type = buildTH<T>(function.reflect()?.parameters?.first()?.type!!)
-
-        val tryDefault = default[type]?.nextValue() as T?
-
-        if(tryDefault != null) return function(tryDefault)
-
-        TODO("generic cases")
+        return function(getGen(type)?.nextValue() as T)
     }
 
     inline fun <reified T> forAll(tries: Int = 100, noinline function: (T) -> Boolean) =
@@ -253,13 +311,24 @@ abstract class GenContext(val random: Random = Random()) {
 
 object Gens : GenContext() {
     init {
-        install { defaultForBoolean() }
-        install { defaultForDouble() }
-        install { defaultForFloat() }
-        install { defaultForByte() }
-        install { defaultForShort() }
-        install { defaultForInt() }
-        install { defaultForLong() }
-        install { defaultForString() }
+        install {-> defaultForBoolean() }
+        install {-> defaultForDouble() }
+        install {-> defaultForFloat() }
+        install {-> defaultForByte() }
+        install {-> defaultForShort() }
+        install {-> defaultForInt() }
+        install {-> defaultForLong() }
+        install {-> defaultForString() }
+
+        install { arg -> defaultForArray(arg) }
+        install { arg -> defaultForList(arg) }
+        install { arg -> defaultForSet(arg) }
+
+        install { arg1, arg2 -> defaultForPair(arg1, arg2) }
+        install { arg1, arg2, arg3 -> defaultForTriple(arg1, arg2, arg3) }
+
+        install {-> defaultForString() as Gen<CharSequence> }
+        install { arg -> defaultForList(arg) as Gen<Collection<*>>}
+        install { arg -> defaultForList(arg) as Gen<Iterable<*>>}
     }
 }

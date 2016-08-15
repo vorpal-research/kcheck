@@ -11,6 +11,6 @@ class BaseTest {
     fun testSimple() {
         assertTrue(Gens.forAll { d: Double? -> d.trace() == d })
 
-        assertTrue(Gens.forAll { d: List<Double?> -> d.trace() == d })
+        assertTrue(Gens.forAll { d: List<Pair<Double?, Set<String>>> -> d.trace() == d })
     }
 }
