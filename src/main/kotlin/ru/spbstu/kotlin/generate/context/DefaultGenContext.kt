@@ -4,7 +4,7 @@ import ru.spbstu.kotlin.generate.cases.*
 import ru.spbstu.kotlin.generate.combinators.Gen
 import ru.spbstu.kotlin.generate.combinators.gen
 
-open class DefaultContext: GenContext() {
+open class DefaultGenContext : GenContext() {
     fun defaultForInt() = priorities(
             1 to constant(0),
             1 to constant(1),
