@@ -4,9 +4,7 @@ import java.util.stream.Stream
 
 @FunctionalInterface
 interface Gen<out T> {
-
     fun nextValue(): T
-
 }
 
 inline fun <T> gen(crossinline f: () -> T) = object: Gen<T> {
