@@ -83,28 +83,13 @@ open class DefaultGenContext : GenContext() {
 
     fun <T> defaultForNullable(pure: Gen<T>) = anyNullable(pure)
 
-    fun <T> defaultForArray(elGen: Gen<T>): Gen<Array<T>> =
+    fun <T> defaultForArray(elGen: Gen<T>): Gen<Array<*>> =
             priorities(
-                    1 to gen { java.lang.reflect.Array.newInstance(Any::class.java, 0) },
-                    1 to gen {
-                        val arr = java.lang.reflect.Array.newInstance(Any::class.java, 1)
-                        java.lang.reflect.Array.set(arr, 0, elGen.nextValue())
-                        arr
-                    },
-                    3 to gen {
-                        val len = random.nextInt(20)
-                        val arr = java.lang.reflect.Array.newInstance(Any::class.java, len)
-                        IntRange(0, len - 1).forEach { java.lang.reflect.Array.set(arr, it, elGen.nextValue()) }
-                        arr
-                    },
-                    3 to gen {
-                        val len = random.nextInt(255)
-                        val arr = java.lang.reflect.Array.newInstance(Any::class.java, len)
-
-                        IntRange(0, len - 1).forEach { java.lang.reflect.Array.set(arr, it, elGen.nextValue()) }
-                        arr
-                    }
-            ) as Gen<Array<T>>
+                    1 to gen { arrayOf<Any?>() },
+                    1 to gen { arrayOf<Any?>(elGen.nextValue() as Any) },
+                    3 to gen { Array<Any?>(random.nextInt(20)){ elGen.nextValue() } },
+                    3 to gen { Array<Any?>(random.nextInt(255)){ elGen.nextValue() } }
+            ) as Gen<Array<*>>
 
 
     fun <T> defaultForList(elGen: Gen<T>): Gen<List<T>> =

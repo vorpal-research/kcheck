@@ -16,5 +16,7 @@ class BaseTest {
         assertFalse(Gens.forAll { t1: Double, t2: Double? -> t1 != t2 })
         assertTrue(Gens.forAll { d: Collection<Pair<Double?, String>> -> d == d })
         assertFalse(Gens.forAll { c1: List<Int?> -> c1.toSet().size == c1.size  })
+        
+        //assertFalse(Gens.forAll { arr: Array<Double> -> arr.sum() < 3.0 })
     }
 }
