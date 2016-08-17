@@ -83,15 +83,6 @@ open class DefaultGenContext : GenContext() {
 
     fun <T> defaultForNullable(pure: Gen<T>) = anyNullable(pure)
 
-    fun <T> defaultForArray(elGen: Gen<T>): Gen<Array<*>> =
-            priorities(
-                    1 to gen { arrayOf<Any?>() },
-                    1 to gen { arrayOf<Any?>(elGen.nextValue() as Any) },
-                    3 to gen { Array<Any?>(random.nextInt(20)){ elGen.nextValue() } },
-                    3 to gen { Array<Any?>(random.nextInt(255)){ elGen.nextValue() } }
-            ) as Gen<Array<*>>
-
-
     fun <T> defaultForList(elGen: Gen<T>): Gen<List<T>> =
             anyList(elGen)
     fun <T> defaultForSet(elGen: Gen<T>): Gen<Set<T>> =
@@ -116,7 +107,6 @@ open class DefaultGenContext : GenContext() {
 
         install { -> defaultForNumber() }
 
-        install { arg -> defaultForArray(arg) }
         install { arg -> defaultForList(arg) }
         install { arg -> defaultForSet(arg) }
         install { arg1, arg2 -> defaultForMap(arg1, arg2) }

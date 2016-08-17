@@ -4,12 +4,14 @@ import ru.spbstu.kotlin.generate.cases.anyNullable
 import ru.spbstu.kotlin.generate.combinators.Gen
 import ru.spbstu.kotlin.generate.util.FancyFunctions
 import ru.spbstu.kotlin.generate.util.FancyFunctions.mapResult
+import ru.spbstu.kotlin.reflection.quasi.Mutability
 import ru.spbstu.kotlin.reflection.quasi.TypeHolder
 import java.util.*
 
 abstract class TypeClassContext<TC> {
 
     abstract fun handleNullable(tc: TC): TC
+    abstract fun handleArray(element: Class<*>, elementTC: TC): TC
 
     val default = HashMap<TypeHolder, TC>()
     val generic1 = HashMap<TypeHolder, (TC) -> TC>()
@@ -61,6 +63,9 @@ abstract class TypeClassContext<TC> {
         if(!th.isNullable) {
             default[th.copy(isNullable = true)] = handleNullable(tc)
         }
+        val arrayTC = handleArray(th.clazz, tc)
+        generic1[TypeHolder(Array<Any?>::class.java, listOf(th), false, Mutability.NONE)] = { arrayTC }
+        generic1[TypeHolder(Array<Any?>::class.java, listOf(th), true, Mutability.NONE)] = { handleNullable(arrayTC) }
     }
 
     operator fun set(th: TypeHolder, f: (TC) -> TC) {

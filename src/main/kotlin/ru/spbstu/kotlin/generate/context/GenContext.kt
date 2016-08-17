@@ -16,6 +16,11 @@ import kotlin.reflect.jvm.reflect
 abstract class GenContext(val random: Random = Random()): TypeClassContext<Gen<*>>() {
 
     override fun handleNullable(tc: Gen<*>): Gen<*> = anyNullable(tc)
+    override fun handleArray(element: Class<*>, elementTC: Gen<*>) =
+            anyArray(
+                    @Suppress("UNCHECKED_CAST")(element as Class<Any>),
+                    @Suppress("UNCHECKED_CAST")(elementTC as Gen<Any>)
+            )
 
     @JvmName("installGenerator")
     inline fun <reified T, reified G : Gen<T>> install(noinline function: () -> G) {

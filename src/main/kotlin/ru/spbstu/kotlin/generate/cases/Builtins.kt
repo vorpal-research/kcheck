@@ -6,6 +6,7 @@ import ru.spbstu.kotlin.generate.cases.priorities
 import ru.spbstu.kotlin.generate.combinators.Gen
 import ru.spbstu.kotlin.generate.combinators.gen
 import ru.spbstu.kotlin.generate.combinators.map
+import ru.spbstu.kotlin.generate.util.ReflectedArray
 
 fun GenContext.anyInt() = gen { random.nextInt() }
 fun GenContext.anyLong() = gen { random.nextLong() }
@@ -34,4 +35,12 @@ fun GenContext.anyNumber(): Gen<Number> =
                 1 to anyShort(),
                 1 to anyDouble(),
                 1 to anyFloat()
+        )
+
+fun <T> GenContext.anyArray(jclass: Class<T>, elGen: Gen<T>): Gen<Array<T>> =
+        priorities(
+                1 to gen { ReflectedArray(jclass, 0).array },
+                1 to gen { ReflectedArray(jclass, 1){ elGen.nextValue() }.array },
+                3 to gen { ReflectedArray(jclass, random.nextInt(20)){ elGen.nextValue() }.array },
+                3 to gen { ReflectedArray(jclass, random.nextInt(255)){ elGen.nextValue() }.array }
         )
