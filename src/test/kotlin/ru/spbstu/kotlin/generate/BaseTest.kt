@@ -4,6 +4,7 @@ import org.junit.Test
 import ru.spbstu.kotlin.generate.context.Gens
 import ru.spbstu.kotlin.reflection.quasi.ktype
 import kotlin.reflect.jvm.reflect
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -19,4 +20,5 @@ class BaseTest {
         
         //assertFalse(Gens.forAll { arr: Array<Double> -> arr.sum() < 3.0 })
     }
+
 }
