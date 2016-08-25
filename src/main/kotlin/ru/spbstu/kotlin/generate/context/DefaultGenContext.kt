@@ -76,6 +76,11 @@ open class DefaultGenContext : GenContext() {
                     1 to defaultForFloat()
             )
 
+    fun defaultForChar() = priorities(
+            2 to anyCommonChar(),
+            1 to anyChar()
+    )
+
     fun defaultForString() = priorities(
             2 to anyReadableString(),
             1 to anyString()
@@ -103,6 +108,7 @@ open class DefaultGenContext : GenContext() {
         install { -> defaultForShort() }
         install { -> defaultForInt() }
         install { -> defaultForLong() }
+        install { -> defaultForChar() }
         install { -> defaultForString() }
 
         install { -> defaultForNumber() }
