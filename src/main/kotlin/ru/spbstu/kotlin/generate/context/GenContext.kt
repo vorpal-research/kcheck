@@ -158,7 +158,7 @@ abstract class GenContext(val random: Random = Random()): TypeClassContext<Gen<*
         val arg1 = buildTypeHolder<T1>(function.reflect()?.parameters?.get(0)?.type!!)
         val arg2 = buildTypeHolder<T2>(function.reflect()?.parameters?.get(1)?.type!!)
         val arg3 = buildTypeHolder<T3>(function.reflect()?.parameters?.get(2)?.type!!)
-        val arg4 = buildTypeHolder<T3>(function.reflect()?.parameters?.get(3)?.type!!)
+        val arg4 = buildTypeHolder<T4>(function.reflect()?.parameters?.get(3)?.type!!)
         return function(
                 get(arg1)?.nextValue() as T1,
                 get(arg2)?.nextValue() as T2,
