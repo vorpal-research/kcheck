@@ -1,5 +1,6 @@
 package ru.spbstu.kotlin.generate.combinators
 
+import ru.spbstu.kotlin.generate.context.GenContext
 import java.util.stream.Stream
 
 @FunctionalInterface
@@ -28,3 +29,11 @@ fun <T> Stream<T>.asGen() = object: Gen<T> {
     val it = iterator()
     override fun nextValue() = it.next()
 }
+
+fun<E> GenContext.oneOf(vararg variants: E) = variants[random.nextInt(variants.size)]
+fun<E> GenContext.oneOf(variants: List<E>) = variants[random.nextInt(variants.size)]
+@JvmName("oneOfArray")
+fun<E> GenContext.oneOf(variants: Array<E>) = variants[random.nextInt(variants.size)]
+fun GenContext.oneOf(variants: CharSequence) = variants[random.nextInt(variants.length)]
+
+
