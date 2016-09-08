@@ -42,7 +42,7 @@ open class DefaultGenContext : GenContext() {
     fun defaultForFloat() = priorities(
             1 to constant(0.0f),
             1 to constant(Float.MAX_VALUE),
-            1 to constant(Float.MIN_VALUE),
+            1 to constant(-Float.MAX_VALUE),
             1 to constant(Float.NEGATIVE_INFINITY),
             1 to constant(Float.POSITIVE_INFINITY),
             1 to constant(Float.NaN),
@@ -56,7 +56,7 @@ open class DefaultGenContext : GenContext() {
     fun defaultForDouble() = priorities(
             1 to constant(0.0),
             1 to constant(Double.MAX_VALUE),
-            1 to constant(Double.MIN_VALUE),
+            1 to constant(-Double.MAX_VALUE),
             1 to constant(Double.NEGATIVE_INFINITY),
             1 to constant(Double.POSITIVE_INFINITY),
             1 to constant(Double.NaN),
