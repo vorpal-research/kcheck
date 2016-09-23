@@ -1,6 +1,8 @@
+@file:Suppress("UNCHECKED_CAST")
 package ru.spbstu.kotlin.generate.context
 
 import com.sun.org.apache.xpath.internal.operations.Bool
+import ru.spbstu.kotlin.generate.assume.AssumptionFailedException
 import ru.spbstu.kotlin.generate.cases.*
 import ru.spbstu.kotlin.generate.combinators.*
 import ru.spbstu.kotlin.generate.util.FancyFunctions
@@ -119,10 +121,20 @@ abstract class GenContext(val random: Random = Random()): TypeClassContext<Gen<*
         set(type, gen)
     }
 
+    inline fun<R> retrying(limit: Int = 100, body: () -> R): R {
+        var count = limit
+        while(--count != 0) {
+            try{ return body() }
+            catch (retry: AssumptionFailedException) {
+                continue
+            }
+        }
+        throw AssumptionFailedException()
+    }
 
     inline fun <reified T, R> feed(noinline function: (T) -> R): R {
         val type = buildTypeHolder<T>(function.reflect()?.parameters?.first()?.type!!)
-        return function(get(type)?.nextValue() as T)
+        return retrying { function(get(type)?.nextValue() as T) }
     }
 
     inline fun <reified T> forAll(tries: Int = 100, noinline function: (T) -> Boolean) =
@@ -131,10 +143,12 @@ abstract class GenContext(val random: Random = Random()): TypeClassContext<Gen<*
     inline fun <reified T1, reified T2, R> feed(noinline function: (T1, T2) -> R): R {
         val arg1 = buildTypeHolder<T1>(function.reflect()?.parameters?.get(0)?.type!!)
         val arg2 = buildTypeHolder<T2>(function.reflect()?.parameters?.get(1)?.type!!)
-        return function(
+        return retrying {
+            function(
                 get(arg1)?.nextValue() as T1,
                 get(arg2)?.nextValue() as T2
-        )
+            )
+        }
     }
 
     inline fun <reified T1, reified T2> forAll(tries: Int = 100, noinline function: (T1, T2) -> Boolean) =
@@ -144,11 +158,13 @@ abstract class GenContext(val random: Random = Random()): TypeClassContext<Gen<*
         val arg1 = buildTypeHolder<T1>(function.reflect()?.parameters?.get(0)?.type!!)
         val arg2 = buildTypeHolder<T2>(function.reflect()?.parameters?.get(1)?.type!!)
         val arg3 = buildTypeHolder<T3>(function.reflect()?.parameters?.get(2)?.type!!)
-        return function(
-                get(arg1)?.nextValue() as T1,
-                get(arg2)?.nextValue() as T2,
-                get(arg3)?.nextValue() as T3
-        )
+        return retrying {
+            function(
+                    get(arg1)?.nextValue() as T1,
+                    get(arg2)?.nextValue() as T2,
+                    get(arg3)?.nextValue() as T3
+            )
+        }
     }
 
     inline fun <reified T1, reified T2, reified T3> forAll(tries: Int = 100, noinline function: (T1, T2, T3) -> Boolean) =
@@ -159,12 +175,14 @@ abstract class GenContext(val random: Random = Random()): TypeClassContext<Gen<*
         val arg2 = buildTypeHolder<T2>(function.reflect()?.parameters?.get(1)?.type!!)
         val arg3 = buildTypeHolder<T3>(function.reflect()?.parameters?.get(2)?.type!!)
         val arg4 = buildTypeHolder<T4>(function.reflect()?.parameters?.get(3)?.type!!)
-        return function(
-                get(arg1)?.nextValue() as T1,
-                get(arg2)?.nextValue() as T2,
-                get(arg3)?.nextValue() as T3,
-                get(arg4)?.nextValue() as T4
-        )
+        return retrying {
+            function(
+                    get(arg1)?.nextValue() as T1,
+                    get(arg2)?.nextValue() as T2,
+                    get(arg3)?.nextValue() as T3,
+                    get(arg4)?.nextValue() as T4
+            )
+        }
     }
 
     inline fun <reified T1, reified T2, reified T3, reified T4> forAll(tries: Int = 100, noinline function: (T1, T2, T3, T4) -> Boolean) =
