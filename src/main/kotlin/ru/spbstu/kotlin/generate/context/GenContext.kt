@@ -138,7 +138,7 @@ abstract class GenContext(val random: Random = Random()): TypeClassContext<Gen<*
     }
 
     inline fun <reified T> forAll(tries: Int = 100, noinline function: (T) -> Boolean) =
-            (0..tries).fold(true) { acc, v -> acc and feed(function) }
+            (0..tries - 1).fold(true) { acc, v -> acc and feed(function) }
 
     inline fun <reified T1, reified T2, R> feed(noinline function: (T1, T2) -> R): R {
         val arg1 = buildTypeHolder<T1>(function.reflect()?.parameters?.get(0)?.type!!)
@@ -152,7 +152,7 @@ abstract class GenContext(val random: Random = Random()): TypeClassContext<Gen<*
     }
 
     inline fun <reified T1, reified T2> forAll(tries: Int = 100, noinline function: (T1, T2) -> Boolean) =
-            (0..tries).fold(true) { acc, v -> acc and feed(function) }
+            (0..tries - 1).fold(true) { acc, v -> acc and feed(function) }
 
     inline fun <reified T1, reified T2, reified T3, R> feed(noinline function: (T1, T2, T3) -> R): R {
         val arg1 = buildTypeHolder<T1>(function.reflect()?.parameters?.get(0)?.type!!)
@@ -168,7 +168,7 @@ abstract class GenContext(val random: Random = Random()): TypeClassContext<Gen<*
     }
 
     inline fun <reified T1, reified T2, reified T3> forAll(tries: Int = 100, noinline function: (T1, T2, T3) -> Boolean) =
-            (0..tries).fold(true) { acc, v -> acc and feed(function) }
+            (0..tries - 1).fold(true) { acc, v -> acc and feed(function) }
 
     inline fun <reified T1, reified T2, reified T3, reified T4, R> feed(noinline function: (T1, T2, T3, T4) -> R): R {
         val arg1 = buildTypeHolder<T1>(function.reflect()?.parameters?.get(0)?.type!!)
@@ -186,7 +186,7 @@ abstract class GenContext(val random: Random = Random()): TypeClassContext<Gen<*
     }
 
     inline fun <reified T1, reified T2, reified T3, reified T4> forAll(tries: Int = 100, noinline function: (T1, T2, T3, T4) -> Boolean) =
-            (0..tries).fold(true) { acc, v -> acc and feed(function) }
+            (0..tries - 1).fold(true) { acc, v -> acc and feed(function) }
 
 }
 
