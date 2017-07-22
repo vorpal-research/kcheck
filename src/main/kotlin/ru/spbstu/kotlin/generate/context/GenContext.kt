@@ -1,17 +1,13 @@
 @file:Suppress("UNCHECKED_CAST")
 package ru.spbstu.kotlin.generate.context
 
-import com.sun.org.apache.xpath.internal.operations.Bool
 import ru.spbstu.kotlin.generate.assume.AssumptionFailedException
-import ru.spbstu.kotlin.generate.cases.*
-import ru.spbstu.kotlin.generate.combinators.*
-import ru.spbstu.kotlin.generate.util.FancyFunctions
-import ru.spbstu.kotlin.reflection.quasi.TypeHolder
+import ru.spbstu.kotlin.generate.cases.anyArray
+import ru.spbstu.kotlin.generate.cases.anyNullable
+import ru.spbstu.kotlin.generate.combinators.Gen
+import ru.spbstu.kotlin.generate.combinators.gen
 import ru.spbstu.kotlin.reflection.quasi.buildTypeHolder
-import ru.spbstu.kotlin.reflection.quasi.buildTypeHolderFromOutput
-import ru.spbstu.kotlin.reflection.quasi.java.javaTypeOf
-import ru.spbstu.kotlin.reflection.quasi.ktype
-import java.lang.reflect.Type
+import ru.spbstu.kotlin.reflection.quasi.typeOf
 import java.util.*
 import kotlin.reflect.jvm.reflect
 
@@ -26,7 +22,7 @@ abstract class GenContext(val random: Random = Random()): TypeClassContext<Gen<*
 
     @JvmName("installGenerator")
     inline fun <reified T, reified G : Gen<T>> install(noinline function: () -> G) {
-        val type = buildTypeHolderFromOutput<G>(function).arguments.first()
+        val type = typeOf(function).arguments.first()
         val gen = function()
         set(type, gen)
     }
@@ -56,7 +52,7 @@ abstract class GenContext(val random: Random = Random()): TypeClassContext<Gen<*
     }
 
     inline fun <reified T> installFunction(noinline function: () -> T) {
-        val type = buildTypeHolderFromOutput<T>(function)
+        val type = typeOf(function)
         val gen = gen(function)
         set(type, gen)
     }
@@ -78,6 +74,10 @@ abstract class GenContext(val random: Random = Random()): TypeClassContext<Gen<*
         val type = buildTypeHolder<T>(ref?.returnType!!)
         val type1 = buildTypeHolder<T1>(ref?.parameters?.get(0)?.type!!)
         val type2 = buildTypeHolder<T2>(ref?.parameters?.get(1)?.type!!)
+
+        println(type)
+        println(type1)
+        println(type2)
 
         val gen = gen{
             val arg1Gen = get(type1) as Gen<T1>

@@ -51,7 +51,7 @@ fun <A, B, C> GenContext.anyTriple(aGen: Gen<A>, bGen: Gen<B>, cGen: Gen<C>): Ge
 
 fun GenContext.anyBigInt(): Gen<BigInteger> = gen{
     val byteSize = random.nextInt(32)
-    val bytes = ByteArray(byteSize)
+    val bytes = ByteArray(byteSize + 1)
     random.nextBytes(bytes)
     BigInteger(bytes)
 }

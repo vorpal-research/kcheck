@@ -16,6 +16,6 @@ class AssumptionsTest {
             true
         }
 
-        Assert.assertEquals(2001, counter)
+        Assert.assertEquals(2000, counter)
     }
 }

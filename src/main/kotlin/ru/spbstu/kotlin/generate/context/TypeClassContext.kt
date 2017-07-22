@@ -19,7 +19,8 @@ abstract class TypeClassContext<TC> {
     val generic3 = HashMap<TypeHolder, (TC, TC, TC) -> TC>()
     val generic4 = HashMap<TypeHolder, (TC, TC, TC, TC) -> TC>()
 
-    operator fun get(type: TypeHolder): TC? {
+    operator fun get(typeWithAnnotations: TypeHolder): TC? {
+        val type = typeWithAnnotations.copy(annotations = emptyList())
         when(type.arguments.size) {
             0 -> return default[type]
             1 -> {
