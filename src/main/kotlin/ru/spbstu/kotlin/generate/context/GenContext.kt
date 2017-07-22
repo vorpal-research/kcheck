@@ -71,13 +71,10 @@ abstract class GenContext(val random: Random = Random()): TypeClassContext<Gen<*
 
     inline fun <reified T1, reified T2, reified T> installFunction(noinline function: (T1, T2) -> T) {
         val ref = function.reflect()
-        val type = buildTypeHolder<T>(ref?.returnType!!)
-        val type1 = buildTypeHolder<T1>(ref?.parameters?.get(0)?.type!!)
-        val type2 = buildTypeHolder<T2>(ref?.parameters?.get(1)?.type!!)
-
-        println(type)
-        println(type1)
-        println(type2)
+        ref ?: throw IllegalArgumentException("Function not reflectible")
+        val type = buildTypeHolder<T>(ref.returnType)
+        val type1 = buildTypeHolder<T1>(ref.parameters[0].type)
+        val type2 = buildTypeHolder<T2>(ref.parameters[1].type)
 
         val gen = gen{
             val arg1Gen = get(type1) as Gen<T1>
@@ -89,10 +86,11 @@ abstract class GenContext(val random: Random = Random()): TypeClassContext<Gen<*
 
     inline fun <reified T1, reified T2, reified T3, reified T> installFunction(noinline function: (T1, T2, T3) -> T) {
         val ref = function.reflect()
-        val type = buildTypeHolder<T>(ref?.returnType!!)
-        val type1 = buildTypeHolder<T1>(ref?.parameters?.get(0)?.type!!)
-        val type2 = buildTypeHolder<T2>(ref?.parameters?.get(1)?.type!!)
-        val type3 = buildTypeHolder<T3>(ref?.parameters?.get(2)?.type!!)
+        ref ?: throw IllegalArgumentException("Function not reflectible")
+        val type = buildTypeHolder<T>(ref.returnType)
+        val type1 = buildTypeHolder<T1>(ref.parameters[0].type)
+        val type2 = buildTypeHolder<T2>(ref.parameters[1].type)
+        val type3 = buildTypeHolder<T3>(ref.parameters[2].type)
 
         val gen = gen{
             val arg1Gen = get(type1) as Gen<T1>
@@ -105,11 +103,12 @@ abstract class GenContext(val random: Random = Random()): TypeClassContext<Gen<*
 
     inline fun <reified T1, reified T2, reified T3, reified T4, reified T> installFunction(noinline function: (T1, T2, T3, T4) -> T) {
         val ref = function.reflect()
-        val type = buildTypeHolder<T>(ref?.returnType!!)
-        val type1 = buildTypeHolder<T1>(ref?.parameters?.get(0)?.type!!)
-        val type2 = buildTypeHolder<T2>(ref?.parameters?.get(1)?.type!!)
-        val type3 = buildTypeHolder<T3>(ref?.parameters?.get(2)?.type!!)
-        val type4 = buildTypeHolder<T4>(ref?.parameters?.get(3)?.type!!)
+        ref ?: throw IllegalArgumentException("Function not reflectible")
+        val type = buildTypeHolder<T>(ref.returnType)
+        val type1 = buildTypeHolder<T1>(ref.parameters[0].type)
+        val type2 = buildTypeHolder<T2>(ref.parameters[1].type)
+        val type3 = buildTypeHolder<T3>(ref.parameters[2].type)
+        val type4 = buildTypeHolder<T4>(ref.parameters[3].type)
 
         val gen = gen{
             val arg1Gen = get(type1) as Gen<T1>
@@ -155,9 +154,11 @@ abstract class GenContext(val random: Random = Random()): TypeClassContext<Gen<*
             (0..tries - 1).fold(true) { acc, v -> acc and feed(function) }
 
     inline fun <reified T1, reified T2, reified T3, R> feed(noinline function: (T1, T2, T3) -> R): R {
-        val arg1 = buildTypeHolder<T1>(function.reflect()?.parameters?.get(0)?.type!!)
-        val arg2 = buildTypeHolder<T2>(function.reflect()?.parameters?.get(1)?.type!!)
-        val arg3 = buildTypeHolder<T3>(function.reflect()?.parameters?.get(2)?.type!!)
+        val refl = function.reflect()
+        refl ?: throw IllegalArgumentException("Function not reflectible")
+        val arg1 = buildTypeHolder<T1>(refl.parameters[0].type)
+        val arg2 = buildTypeHolder<T2>(refl.parameters[1].type)
+        val arg3 = buildTypeHolder<T3>(refl.parameters[2].type)
         return retrying {
             function(
                     get(arg1)?.nextValue() as T1,
@@ -171,10 +172,12 @@ abstract class GenContext(val random: Random = Random()): TypeClassContext<Gen<*
             (0..tries - 1).fold(true) { acc, v -> acc and feed(function) }
 
     inline fun <reified T1, reified T2, reified T3, reified T4, R> feed(noinline function: (T1, T2, T3, T4) -> R): R {
-        val arg1 = buildTypeHolder<T1>(function.reflect()?.parameters?.get(0)?.type!!)
-        val arg2 = buildTypeHolder<T2>(function.reflect()?.parameters?.get(1)?.type!!)
-        val arg3 = buildTypeHolder<T3>(function.reflect()?.parameters?.get(2)?.type!!)
-        val arg4 = buildTypeHolder<T4>(function.reflect()?.parameters?.get(3)?.type!!)
+        val refl = function.reflect()
+        refl ?: throw IllegalArgumentException("Function not reflectible")
+        val arg1 = buildTypeHolder<T1>(refl.parameters[0].type)
+        val arg2 = buildTypeHolder<T2>(refl.parameters[1].type)
+        val arg3 = buildTypeHolder<T3>(refl.parameters[2].type)
+        val arg4 = buildTypeHolder<T4>(refl.parameters[3].type)
         return retrying {
             function(
                     get(arg1)?.nextValue() as T1,
