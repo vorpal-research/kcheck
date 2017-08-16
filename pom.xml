@@ -6,12 +6,12 @@
 
     <groupId>ru.spbstu</groupId>
     <artifactId>kcheck</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>0.0.0.2</version>
 
     <repositories>
         <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
+            <id>bintray-vorpal-research-kotlin-maven</id>
+            <url>http://dl.bintray.com/vorpal-research/kotlin-maven</url>
         </repository>
     </repositories>
 
@@ -54,9 +54,9 @@
         </dependency>
 
         <dependency>
-            <groupId>com.github.belyaev-mikhail</groupId>
+            <groupId>ru.spbstu</groupId>
             <artifactId>kotlin-quasi-reflection</artifactId>
-            <version>master-SNAPSHOT</version>
+            <version>0.0.0.2</version>
         </dependency>
     </dependencies>
 
@@ -138,4 +138,14 @@
             </plugin>
         </plugins>
     </build>
+
+    <distributionManagement>
+        <repository>
+            <id>bintray-vorpal-research-kotlin-maven</id>
+            <name>vorpal-research-kotlin-maven</name>
+            <url>https://api.bintray.com/maven/vorpal-research/kotlin-maven/${artifactId}/;publish=1</url>
+        </repository>
+    </distributionManagement>
+
+
 </project>
