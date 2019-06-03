@@ -359,6 +359,21 @@ open class ShrinkerContext {
                     shrinkMany(t.toList(), als.toList()).map { Tuple.ofList(it) as Tuple5<Any?, Any?, Any?, Any?, Any?> }
                 }
             }
+            instance { elements ->
+                check(elements.size == 6)
+                val als = elements.map { shrinker of it } as List<Shrinker<Any?>>
+                shrinker { t: Tuple6<*, *, *, *, *, *> ->
+                    shrinkMany(t.toList(), als.toList()).map { Tuple.ofList(it) as Tuple6<Any?, Any?, Any?, Any?, Any?, Any?> }
+                }
+            }
+            instance { elements ->
+                check(elements.size == 7)
+                val als = elements.map { shrinker of it } as List<Shrinker<Any?>>
+                shrinker { t: Tuple7<*, *, *, *, *, *, *> ->
+                    shrinkMany(t.toList(), als.toList()).map { Tuple.ofList(it) as Tuple7<Any?, Any?, Any?, Any?, Any?, Any?, Any?> }
+                }
+            }
+
 
         }
     }

@@ -6,7 +6,7 @@
 
     <groupId>ru.spbstu</groupId>
     <artifactId>kcheck</artifactId>
-    <version>0.0.0.3</version>
+    <version>0.0.0.4</version>
 
     <repositories>
         <repository>
@@ -50,7 +50,7 @@
         <dependency>
             <groupId>ru.spbstu</groupId>
             <artifactId>kotlin-type-classes</artifactId>
-            <version>0.0.0.3</version>
+            <version>0.0.0.4</version>
         </dependency>
 
         <dependency>

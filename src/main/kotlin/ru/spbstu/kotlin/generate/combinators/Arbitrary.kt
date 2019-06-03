@@ -2,7 +2,7 @@ package ru.spbstu.kotlin.generate.combinators
 
 import ru.spbstu.kotlin.generate.*
 import ru.spbstu.kotlin.generate.arbitraries.*
-import ru.spbstu.kotlin.generate.util.HighQualityRandom
+import ru.spbstu.kotlin.generate.util.*
 import ru.spbstu.kotlin.typeclass.TCKind
 import ru.spbstu.kotlin.typeclass.TypeClasses
 import ru.spbstu.ktuples.Tuple
@@ -253,6 +253,14 @@ open class GenerationContext {
                 val als = Tuple(a, b, c, d, e).mapEach { arbitrary of it }
                 arbitrary { als.mapEach { it.next() } }
             }
+            instance { (a, b, c, d, e, f), annos ->
+                val als = Tuple(a, b, c, d, e, f).mapEach { arbitrary of it }
+                arbitrary { als.mapEach { it.next() } }
+            }
+            instance { (a, b, c, d, e, f, g), annos ->
+                val als = Tuple(a, b, c, d, e, f, g).mapEach { arbitrary of it }
+                arbitrary { als.mapEach { it.next() } }
+            }
 
         }
     }
@@ -284,3 +292,6 @@ fun<E> GenerationContext.oneOf(variants: List<E>) = variants[random.nextInt(vari
 fun<E> GenerationContext.oneOf(variants: Array<E>) = variants[random.nextInt(variants.size)]
 fun GenerationContext.oneOf(variants: CharSequence) = variants[random.nextInt(variants.length)]
 
+operator fun <T> Arbitrary<T>.iterator() = iterator {
+    while(true) yield(next())
+}
