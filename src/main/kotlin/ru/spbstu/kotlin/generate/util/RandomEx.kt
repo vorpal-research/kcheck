@@ -51,7 +51,10 @@ fun Random.nextChar(alphabet: CharSequence) = alphabet[nextInt(alphabet.length)]
 fun Random.nextString(alphabet: CharSequence, minLength: Int = 0, maxLength: Int = 1001) =
         charSequence(alphabet).take(nextInRange(minLength, maxLength)).joinToString(separator = "")
 
-fun Random.nextInRange(min: Int, max: Int): Int = (nextLong(max.toLong() - min.toLong()) + min).toInt()
+fun Random.nextInRange(min: Int, max: Int): Int = when {
+    max == min -> min
+    else -> (nextLong(max.toLong() - min.toLong()) + min).toInt()
+}
 fun Random.nextInRange(min: Long, max: Long): Long {
     // this is a bit tricky
     val minHalf = min / 2

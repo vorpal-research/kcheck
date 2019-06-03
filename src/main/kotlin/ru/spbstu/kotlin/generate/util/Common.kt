@@ -66,3 +66,8 @@ private class CharListAsCharSequence(val from: List<Char>): CharSequence {
 }
 
 fun List<Char>.asCharSequence(): CharSequence = CharListAsCharSequence(this)
+
+inline fun <reified T> Iterable<*>.firstInstanceOf(): T? {
+    for(e in this) if(e is T) return e
+    return null
+}

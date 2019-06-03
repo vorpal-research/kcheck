@@ -1,19 +1,38 @@
-@file:Suppress("UNCHECKED_CAST")
-
 package ru.spbstu.kotlin.generate.util
 
-import java.lang.reflect.Array
+import kotlin.reflect.*
+import kotlin.reflect.full.createType
+import kotlin.reflect.full.defaultType
+import kotlin.reflect.jvm.reflect
 
-data class ReflectedArray<T>(val element: Class<T>, val array: kotlin.Array<T>) {
-    constructor(element: Class<T>, size: Int): this(element, Array.newInstance(element, size) as kotlin.Array<T>)
-    constructor(element: Class<T>, size: Int, init: (Int) -> Any?):
-            this(element, Array.newInstance(element, size) as kotlin.Array<T>) {
-        (0..size).forEach { i ->
-            Array.set(array, i, init(i))
+fun KType.copy(classifier: KClassifier? = this.classifier,
+               arguments: List<KTypeProjection> = this.arguments,
+               nullable: Boolean = this.isMarkedNullable,
+               annotations: List<Annotation> = this.annotations) =
+        when (classifier) {
+            null -> throw IllegalArgumentException("Unsupported classifier: null")
+            else -> classifier.createType(arguments, nullable, annotations)
         }
-    }
 
-    operator fun get(index: Int): T? = Array.get(array, index) as? T?
-    operator fun set(index: Int, value: T?) = Array.set(array, index, value)
+inline fun KType.mapArguments(mapper: (KType) -> KType) = when {
+    arguments.isEmpty() -> this
+    else -> copy(arguments = arguments.map { it.copy(type = it.type?.let(mapper)) })
 }
 
+val KType.supertypes get() = when (classifier) {
+    is KClass<*> -> {
+        val klass = classifier as KClass<*>
+        val raw = klass.defaultType // yes, we need this deprecated guy here
+        val argMap = (raw.arguments zip this.arguments).map { (a, b) -> a.type to b.type }.toMap()
+        klass.supertypes.map { it.mapArguments { argMap[it] ?: it } }
+    }
+    is KTypeParameter -> (classifier as KTypeParameter).upperBounds
+    else -> throw IllegalArgumentException("Unsupported classifier: $classifier")
+}
+
+inline fun <reified T> typeOf(noinline body: () -> T) = body.reflect()!!.returnType
+
+fun KType.subst(mapping: Map<KType, KType>): KType = when {
+    this in mapping -> mapping.getValue(this)
+    else -> mapArguments { it.subst(mapping) }
+}
