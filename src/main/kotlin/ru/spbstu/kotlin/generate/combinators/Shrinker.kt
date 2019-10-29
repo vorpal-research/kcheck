@@ -243,9 +243,9 @@ open class ShrinkerContext {
                         yield(l.filterIndexedTo(mutableSetOf()) { i, _ -> i >= l.size / 2 })
                         yield(l.filterIndexedTo(mutableSetOf()) { i, _ -> i >= l.size / 4 && i <= l.size * 3 / 4 })
                     }
-                }
 
-                yieldAll(l.map { el.shrink(it) }.transposeTo { mutableSetOf<T>() })
+                    yieldAll(l.map { el.shrink(it) }.transposeTo { mutableSetOf<T>() })
+                }
             }.filter(::check)
         }
     }
@@ -261,9 +261,8 @@ open class ShrinkerContext {
                         yield(m.entries.drop(m.size / 2).associateByTo(mutableMapOf(), { it.key }, { it.value }))
                         yield(m.entries.drop(m.size / 4).take(m.size / 2).associateByTo(mutableMapOf(), { it.key }, { it.value }))
                     }
+                    yieldAll(m.map { k.shrink(it.key) zip v.shrink(it.value) }.transpose().map { it.toMap() })
                 }
-
-                yieldAll(m.map { k.shrink(it.key) zip v.shrink(it.value) }.transpose().map { it.toMap() })
             }.filter(::check)
         }
     }
