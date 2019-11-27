@@ -5,6 +5,7 @@ import ru.spbstu.kotlin.typeclass.TypeClasses
 import ru.spbstu.ktuples.*
 import ru.spbstu.wheels.getOrElse
 import ru.spbstu.wheels.tryEx
+import java.util.concurrent.TimeoutException
 import kotlin.reflect.KType
 import kotlin.reflect.KTypeProjection
 import kotlin.reflect.full.createType
@@ -73,6 +74,8 @@ internal fun <T> shrink(
                 body(v)
             }
             catch(assume: AssumptionFailedException) {}
+            // do not shrink on timeout
+            catch(timeout: TimeoutException) { return@with v to timeout }
             catch(ex: Exception) {
                 current = v
                 currentEx = ex
