@@ -6,7 +6,7 @@
 
     <groupId>ru.spbstu</groupId>
     <artifactId>kcheck</artifactId>
-    <version>0.0.0.5</version>
+    <version>0.0.0.6</version>
 
     <repositories>
         <repository>
