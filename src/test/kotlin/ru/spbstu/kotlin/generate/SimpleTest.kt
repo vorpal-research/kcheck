@@ -19,7 +19,7 @@ class SimpleTest {
         println(tp)
         println(tp.supertypes)
 
-        println(fee(listOf(1, 2)))
+        //println(fee(listOf(1, 2)))
     }
 
     @Test
