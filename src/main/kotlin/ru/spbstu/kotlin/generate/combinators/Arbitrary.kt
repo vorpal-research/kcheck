@@ -257,10 +257,6 @@ open class GenerationContext {
                 val als = Tuple(a, b, c, d, e, f).mapEach { arbitrary of it }
                 arbitrary { als.mapEach { it.next() } }
             }
-            instance { (a, b, c, d, e, f, g), annos ->
-                val als = Tuple(a, b, c, d, e, f, g).mapEach { arbitrary of it }
-                arbitrary { als.mapEach { it.next() } }
-            }
 
         }
     }

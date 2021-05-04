@@ -217,23 +217,4 @@ object KCheck {
         }
     }
 
-    inline fun <reified A, reified B, reified C,
-            reified D, reified E, reified F, reified G> forAll(generationIterations: Int = 100,
-                                                    shrinkingIterations: Int = 100,
-                                                    appendable: Appendable = NullAppendable,
-                                                    noinline body: (A, B, C, D, E, F, G) -> Unit) {
-        with(TypeClasses) {
-            val types = body.reflect()!!.parameters.map { it.type }
-            val tuple = Tuple5::class.createType(types.map { KTypeProjection.invariant(it) })
-            val generator = (arbitrary of tuple) as Arbitrary<Tuple7<A, B, C, D, E, F, G>>
-            val shrinker = getShrinker<Tuple7<A, B, C, D, E, F, G>>(tuple)
-
-            val tupleBody = { t: Tuple7<A, B, C, D, E, F, G> -> t.letAll(body) }
-
-            val (generated, ex) =
-                    generate(generationIterations, generator, appendable, tupleBody) ?: return
-            val (shrinked, ex2) = shrink(shrinkingIterations, shrinker, generated, ex, appendable, tupleBody)
-            throw ForInputException(shrinked, ex2)
-        }
-    }
 }
